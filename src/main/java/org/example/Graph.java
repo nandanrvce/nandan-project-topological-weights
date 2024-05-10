@@ -4,14 +4,14 @@ import java.util.*;
 
 public class Graph {
 
-    private Map<String, Node> nodes = new HashMap<>();
-    private Map<Node, Integer> incomingEdgesCount = new HashMap<>();
+    private final Map<String, Node> nodes = new HashMap<>();
+    private final Map<Node, Integer> incomingEdgesCount = new HashMap<>();
 
-    private List<Edge> edges = new ArrayList<>();
+    private final List<Edge> edges = new ArrayList<>();
 
-    private Stack<Node> st = new Stack<>();
+    private final Stack<Node> st = new Stack<>();
 
-    private Map<Node,Boolean> visited = new HashMap<>();
+    private final Map<Node,Boolean> visited = new HashMap<>();
 
     public void prepare(List<DBRow> rows) {
         for (DBRow row: rows) {
@@ -36,7 +36,21 @@ public class Graph {
                 simplify1(node);
             }
         }
+        removeZeroWeightEdges();
     }
+
+    private void removeZeroWeightEdges() {
+        for (Node node : nodes.values()) {
+            List<Edge> validEdges = new ArrayList<>();
+            for (Edge edge : node.getEdges()) {
+                if (edge.getWeight() > 0) {  // Check if the edge weight is greater than zero
+                    validEdges.add(edge);
+                }
+            }
+            node.setEdges(validEdges);  // Update the node's edges to only include valid edges
+        }
+    }
+
 
     public void simplify1(Node srcNode) {
         if (srcNode == null || srcNode.getEdges().isEmpty()) {
@@ -85,21 +99,6 @@ public class Graph {
         }
     }
 
-//    private void pushToStack(Stack<Node> st, Node srcNode) {
-//        Stack<Node> temp = new Stack<>();
-//        temp.push(srcNode);
-//        st.push(srcNode);
-//        while(!temp.isEmpty()){
-//            Node node = temp.pop();
-//            for (Edge edge: node.getEdges()) {
-//                final Node neighbour = edge.getDst();
-//                temp.push(neighbour);
-//                st.push(neighbour);
-//            }
-//        }
-//
-//    }
-
     private void pushToStack(Stack<Node> st, Node srcNode) {
         // Use a HashSet to avoid pushing duplicates to the stack
         Set<Node> seen = new HashSet<>();
@@ -136,6 +135,12 @@ public class Graph {
         for (Edge edge: srcNode.getEdges()) {
             System.out.println(edge.getSrc() + " -> " + edge.getDst() + ": " + edge.getWeight());
             print(edge.getDst());
+        }
+    }
+
+    public void printAllEdges() {
+        for (Edge edge : edges) {
+            System.out.println(edge.getSrc().getVal() + " -> " + edge.getDst().getVal() + ": " + edge.getWeight());
         }
     }
 }
